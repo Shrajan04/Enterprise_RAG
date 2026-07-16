@@ -1,0 +1,41 @@
+# ============================
+# Backend Framework
+# ============================
+fastapi
+uvicorn
+
+# ============================
+# Configuration
+# ============================
+python-dotenv
+pydantic-settings
+
+# ============================
+# Database
+# ============================
+sqlalchemy
+psycopg2-binary
+alembic
+
+# ============================
+# Authentication
+# ============================
+python-jose[cryptography]
+passlib[bcrypt]
+
+# ============================
+# RAG
+# ============================
+langchain
+langgraph
+qdrant-client
+
+# ============================
+# Embeddings
+# ============================
+sentence-transformers
+
+# ============================
+# OCR
+# ============================
+pytesseract

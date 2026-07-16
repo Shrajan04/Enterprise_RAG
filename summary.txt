@@ -1,0 +1,182 @@
+Project TItle: Enterprise Multimodal RAG Platform with Agentic Retrieval and Hybrid Search
+
+Project Goal: Build an enterprise AI platform that allows u sers to upload organizational documents
+              (PDFs, DOCX, PPTX, images, and scanned files) and interact with them through natural language. 
+              The platform should provide accurate, cited answers using advanced retrieval techniques such as 
+              hybrid search, reranking, and agentic workflows.
+
+Functional Requirements:
+    -Authentication
+    -Login/Register
+    -JWT authentication
+    -User profiles
+
+Document Upload
+Supported formats:
+    -PDF
+    -DOCX
+    -PPTX
+    -PNG
+    -JPG
+    -Scanned PDFs
+
+
+Document Processing Pipeline:
+Upload
+
+↓
+
+Extract text
+
+↓
+
+Extract tables
+
+↓
+
+Extract images
+
+↓
+
+OCR (if required)
+
+↓
+
+Generate metadata
+
+↓
+
+Chunk document
+
+↓
+
+Generate embeddings
+
+↓
+
+Store in vector database
+
+High-Level Architecture:
+React Frontend
+        │
+        ▼
+FastAPI Backend
+        │
+        ▼
+Authentication Service
+        │
+        ▼
+Workspace Service
+        │
+        ▼
+Document Service
+        │
+        ▼
+Document Processing Pipeline
+        │
+ ┌──────┼───────────┐
+ │      │           │
+Text  Tables     Images
+ │      │           │
+OCR if needed
+ │
+ ▼
+Chunking
+ │
+ ▼
+Embeddings
+ │
+ ▼
+Qdrant
+ │
+ ▼
+Hybrid Retrieval
+ │
+ ▼
+LangGraph
+ │
+ ▼
+LLM
+ │
+ ▼
+Response + Citations
+
+
+Suggested Folder Structure:
+enterprise-rag/
+│
+├── frontend/                 # React
+│
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── auth/
+│   │   ├── workspace/
+│   │   ├── documents/
+│   │   ├── ingestion/
+│   │   ├── retrieval/
+│   │   ├── agents/
+│   │   ├── chat/
+│   │   ├── reports/
+│   │   ├── database/
+│   │   └── utils/
+│   │
+│   ├── tests/
+│   └── requirements.txt
+│
+├── docker/
+│
+├── docs/
+│
+└── README.md
+
+Development Phases:
+Phase 1 — Foundation
+Project setup
+Authentication
+Workspace creation
+File upload
+Phase 2 — RAG Core
+Document parsing
+Chunking
+Embeddings
+Vector database
+Basic chat
+Phase 3 — Advanced Retrieval
+Hybrid search
+Query rewriting
+Multi-query retrieval
+Reranking
+Citations
+Phase 4 — Multimodal
+OCR
+Images
+Tables
+PPT support
+Phase 5 — Agentic AI
+LangGraph workflow
+Router agent
+Comparison agent
+Summary agent
+Report generation
+Phase 6 — Production
+Docker
+Logging
+Testing
+Deployment
+
+
+My suggestion for your setup
+
+If your laptop has 16 GB or more RAM, here's what I'd use:
+
+✅ React
+✅ FastAPI
+✅ PostgreSQL
+✅ Qdrant
+✅ LangChain
+✅ LangGraph
+✅ Tesseract OCR
+✅ BGE embeddings (CPU)
+✅ BM25
+✅ Gemini 2.5 Flash API
