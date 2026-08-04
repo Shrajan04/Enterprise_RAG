@@ -18,11 +18,11 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database.dependencies import get_db
-from Schemas.user import UserCreate
+from Schemas.user import UserCreate, UserLogin
 from config.settings import settings
 
 from models.user import User
-from utils.security import hash_password
+from utils.security import hash_password, verify_password
 
 app = FastAPI(
     title=settings.app_name,
@@ -68,4 +68,26 @@ def register(
     return {
     "message": "User registered successfully",
     "user_id": new_user.id
+    }
+
+@app.post("/login")
+def login(
+    user: UserLogin,
+    db: Session = Depends(get_db)
+):
+    existing_user = (
+        db.query(User).filter(User.email == user.email).first()
+    )
+    if not existing_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+     )
+    if not verify_password(user.password, existing_user.password):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+    return {
+    "message": "Login successful"
     }
