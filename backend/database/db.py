@@ -1,3 +1,19 @@
+# ================================================================
+# File: db.py
+#
+# Purpose:
+# Creates and configures the database connection.
+#
+# Responsibilities:
+# - Connects FastAPI with PostgreSQL.
+# - Creates the SQLAlchemy Engine.
+# - Creates SessionLocal (Session Factory).
+# - Creates the Base class for all database models.
+#
+# This file only sets up the database infrastructure.
+# It does NOT perform database queries.
+# ================================================================
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from config.settings import settings
