@@ -15,6 +15,7 @@
 # ================================================================
 
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from database.dependencies import get_db
@@ -23,6 +24,10 @@ from config.settings import settings
 
 from models.user import User
 from utils.security import hash_password, verify_password
+
+from utils.jwt_handler import create_access_token
+
+from utils.auth import get_current_user
 
 app = FastAPI(
     title=settings.app_name,
@@ -72,11 +77,11 @@ def register(
 
 @app.post("/login")
 def login(
-    user: UserLogin,
+    user: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
     existing_user = (
-        db.query(User).filter(User.email == user.email).first()
+        db.query(User).filter(User.email == user.username).first()
     )
     if not existing_user:
         raise HTTPException(
@@ -88,6 +93,22 @@ def login(
             status_code=401,
             detail="Invalid email or password"
         )
+    token = create_access_token(
+    data={
+        "sub": existing_user.email
+    }
+    )
+
     return {
-    "message": "Login successful"
+    "access_token": token,
+    "token_type": "bearer"
+    }
+
+@app.get("/profile")
+def profile(
+    current_user: User = Depends(get_current_user)
+    ):
+    return {
+        "username": current_user.username,
+        "email": current_user.email
     }
