@@ -111,4 +111,4 @@ def profile(
     return {
         "username": current_user.username,
         "email": current_user.email
-    }
+      }
