@@ -29,10 +29,14 @@ from utils.jwt_handler import create_access_token
 
 from utils.auth import get_current_user
 
+from routes.documents import router as document_router
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version
 )
+
+app.include_router(document_router)
 
 @app.post("/register")
 def register(
