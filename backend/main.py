@@ -31,6 +31,8 @@ from utils.auth import get_current_user
 
 from routes.documents import router as document_router
 
+
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version
