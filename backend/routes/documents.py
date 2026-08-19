@@ -30,4 +30,4 @@ def upload_document(
     return {
         "filename": file.filename,
         "uploaded_by": current_user.email
-    }
+    } 
