@@ -17,6 +17,10 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from models.user import User
 from utils.auth import get_current_user
+import os
+import shutil
+
+from services.document_processor import extract_text_from_pdf, chunk_text
 
 router = APIRouter(
     prefix="/documents",
@@ -27,7 +31,27 @@ def upload_document(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
 ):
+    upload_dir = "uploads"
+
+    os.makedirs(upload_dir, exist_ok=True)
+
+    file_path = os.path.join(
+        upload_dir,
+        file.filename
+    )
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    text = extract_text_from_pdf(file_path)
+
+    chunks = chunk_text(text)
+
     return {
+        "message": "File uploaded and text extracted successfully",
         "filename": file.filename,
-        "uploaded_by": current_user.email
-    } 
+        "uploaded_by": current_user.email,
+        "number_of_chunks": len(chunks),
+        "chunks":chunks
+    }
+
