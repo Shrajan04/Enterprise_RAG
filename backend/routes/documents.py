@@ -52,6 +52,5 @@ def upload_document(
         "filename": file.filename,
         "uploaded_by": current_user.email,
         "number_of_chunks": len(chunks),
-        "chunks":chunks
+        "chunks": chunks 
     }
-
