@@ -22,7 +22,7 @@ import shutil
 
 from services.document_processor import extract_text_from_pdf, chunk_text
 
-from services.embedding_service import create_embeddings
+from services.embedding_service import create_embeddings, create_query_embedding
 
 from services.vector_store import add_documents
 
