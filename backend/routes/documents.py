@@ -22,6 +22,10 @@ import shutil
 
 from services.document_processor import extract_text_from_pdf, chunk_text
 
+from services.embedding_service import create_embeddings
+
+from services.vector_store import add_documents
+
 router = APIRouter(
     prefix="/documents",
     tags=["Documents"]
@@ -47,10 +51,18 @@ def upload_document(
 
     chunks = chunk_text(text)
 
+    embeddings = create_embeddings(chunks)
+
+    add_documents(
+        chunks=chunks,
+        embeddings=embeddings,
+        user_id= current_user.id,
+        filename=file.filename
+    )
+
     return {
         "message": "File uploaded and text extracted successfully",
         "filename": file.filename,
         "uploaded_by": current_user.email,
-        "number_of_chunks": len(chunks),
-        "chunks": chunks 
+        "number_of_chunks": len(chunks)
     }
