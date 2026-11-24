@@ -33,10 +33,15 @@ class Settings(BaseSettings):
     database_user: str
     database_password: str
 
+    # gemini api key
+    gemini_api_key: str
+
     model_config = {
         "env_file": ".env",
         "case_sensitive": False
     }
+
+    
 
 
 settings = Settings()

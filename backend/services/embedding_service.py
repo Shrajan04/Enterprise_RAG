@@ -21,3 +21,7 @@ embeddings_model = HuggingFaceEmbeddings(
 
 def create_embeddings(chunks: list[str]):
     return embeddings_model.embed_documents(chunks)
+
+def create_query_embedding(query: str):
+    return embeddings_model.embed_query(query)
+

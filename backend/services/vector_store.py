@@ -29,16 +29,18 @@ def add_documents(
     chunks: list[str],
     embeddings: list[list[float]],
     user_id: int,
-    filename: str
+    filename: str,
+    document_id: int
 ):
     ids = [
-        f"{user_id}_{filename}_{i}"
+        f"{document_id}_{i}"
         for i in range(len(chunks))
     ]
 
     metadatas = [
         {
             "user_id": str(user_id),
+            "document_id": str(document_id),
             "filename": filename
         }
         for _ in chunks
@@ -51,7 +53,7 @@ def add_documents(
         metadatas=metadatas
     )
 
-    def search_documents(
+def search_documents(
     query_embedding: list[float],
     user_id: int,
     top_k: int = 5
@@ -65,3 +67,12 @@ def add_documents(
     )
 
      return results
+
+def delete_document(document_id: int):
+    collection.delete(
+        where={
+            "document_id": str(document_id)
+        }
+    )
+
+    

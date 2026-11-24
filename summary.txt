@@ -1,6 +1,6 @@
 Project TItle: Enterprise Multimodal RAG Platform with Agentic Retrieval and Hybrid Search
 
-Project Goal: Build an enterprise AI platform that allows u sers to upload organizational documents
+Project Goal: Build an enterprise AI platform that allows users to upload organizational documents
               (PDFs, DOCX, PPTX, images, and scanned files) and interact with them through natural language. 
               The platform should provide accurate, cited answers using advanced retrieval techniques such as 
               hybrid search, reranking, and agentic workflows.
