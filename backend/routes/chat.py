@@ -20,7 +20,7 @@ from utils.auth import get_current_user
 
 from services.embedding_service import create_query_embedding
 from services.vector_store import search_documents
-from services.llm_service import generate_answer
+from services.llm_service import generate_answer, NOT_FOUND
 
 router = APIRouter(
     prefix="/chat",
@@ -52,6 +52,9 @@ def search(
 
     context = "\n\n".join(documents)
     answer = generate_answer(question=query, context=context)
+
+    if NOT_FOUND in answer:
+        return {"query": query, "answer": answer, "sources": []}
 
     sources = []
     seen = set()

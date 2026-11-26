@@ -19,6 +19,7 @@ from models.user import User
 from utils.auth import get_current_user
 import os
 import shutil
+import uuid
 
 from services.document_processor import extract_text_from_pdf, chunk_text
 
@@ -41,46 +42,61 @@ def upload_document(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    original_name = os.path.basename(file.filename or "")
+
+    # 1. Validate: extension, then real PDF header
+    if not original_name.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+    if file.file.read(5) != b"%PDF-":
+        raise HTTPException(status_code=400, detail="File is not a valid PDF")
+    file.file.seek(0)
+
+    # 2. Save under a server-generated name
     upload_dir = "uploads"
-
     os.makedirs(upload_dir, exist_ok=True)
-
-    file_path = os.path.join(
-        upload_dir,
-        file.filename
-    )
+    file_path = os.path.join(upload_dir, f"{uuid.uuid4().hex}.pdf")
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    document = Document(
-    filename=file.filename,
-    file_path=file_path,
-    user_id=current_user.id
-)
+    document = None
+    try:
+        text = extract_text_from_pdf(file_path)
+        chunks = chunk_text(text)
+        if not chunks:
+            raise ValueError("No text could be extracted from this PDF")
+        embeddings = create_embeddings(chunks)
 
-    db.add(document)
-    db.commit()
-    db.refresh(document)
+        document = Document(
+            filename=original_name,
+            file_path=file_path,
+            user_id=current_user.id
+        )
+        db.add(document)
+        db.commit()
+        db.refresh(document)
 
-    text = extract_text_from_pdf(file_path)
-
-    chunks = chunk_text(text)
-
-    embeddings = create_embeddings(chunks)
-
-    add_documents(
-        chunks=chunks,
-        embeddings=embeddings,
-        user_id= current_user.id,
-        filename=file.filename,
-        document_id=document.id
-    )
+        add_documents(
+            chunks=chunks,
+            embeddings=embeddings,
+            user_id=current_user.id,
+            filename=original_name,
+            document_id=document.id
+        )
+    except Exception as e:
+        db.rollback()
+        if document is not None and document.id is not None:
+            delete_document(document.id)
+            db.delete(document)
+            db.commit()
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(status_code=422, detail=f"Upload failed: {e}")
 
     return {
         "message": "File uploaded and text extracted successfully",
         "document_id": document.id,
-        "filename": file.filename,
+        "filename": original_name,
         "uploaded_by": current_user.email,
         "number_of_chunks": len(chunks)
     }
