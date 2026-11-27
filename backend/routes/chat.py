@@ -1,17 +1,11 @@
 # Chat and Retrieval Routes
 #
-# This module handles user queries for the Enterprise RAG system.
-#
-# Responsibilities:
-# - Accept questions from authenticated users.
-# - Convert user questions into embeddings.
-# - Search the vector database for relevant document chunks.
-# - Restrict retrieval to documents belonging to the authenticated user.
-# - Later generate AI-powered answers using the retrieved context.
-# - Later support chat history, citations, streaming responses,
-#   hybrid search, and agentic retrieval.
+# Accepts questions from authenticated users, rewrites follow-ups into
+# standalone questions using recent chat history, retrieves matching chunks
+# for that user only, and generates a grounded answer with sources.
 #=============================================================================
 
+import json
 
 from fastapi import APIRouter, Depends
 
@@ -20,7 +14,9 @@ from utils.auth import get_current_user
 
 from services.embedding_service import create_query_embedding
 from services.vector_store import search_documents
-from services.llm_service import generate_answer, NOT_FOUND
+from services.llm_service import generate_answer, rewrite_question, NOT_FOUND
+
+from services.smalltalk import small_talk_reply
 
 router = APIRouter(
     prefix="/chat",
@@ -30,9 +26,22 @@ router = APIRouter(
 @router.get("/search")
 def search(
     query: str,
+    history: str = "[]",
     current_user: User = Depends(get_current_user)
 ):
-    query_embedding = create_query_embedding(query)
+    reply = small_talk_reply(query)
+    if reply:
+        return {"query": query, "answer": reply, "sources": []}
+
+    # History arrives as a JSON string: [{"role": "user", "text": "..."}, ...]
+    try:
+        history_list = json.loads(history)[-6:]
+    except Exception:
+        history_list = []
+
+    standalone = rewrite_question(query, history_list)
+
+    query_embedding = create_query_embedding(standalone)
 
     results = search_documents(
         query_embedding=query_embedding,
@@ -42,6 +51,8 @@ def search(
 
     documents = results["documents"][0]
     metadatas = results["metadatas"][0]
+    print("STANDALONE:", standalone)
+    print("CHUNKS:", [d[:80] for d in documents])
 
     if not documents:
         return {
@@ -51,7 +62,7 @@ def search(
         }
 
     context = "\n\n".join(documents)
-    answer = generate_answer(question=query, context=context)
+    answer = generate_answer(question=standalone, context=context, history=history_list)
 
     if NOT_FOUND in answer:
         return {"query": query, "answer": answer, "sources": []}
